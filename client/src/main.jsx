@@ -2,12 +2,18 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './tailwind.css'
-import { BoardProvider } from './context/BoardProvider.jsx'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { UserProvider } from './context/UserProvider.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BoardProvider>
-      <App />
-    </BoardProvider>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="*" element={<App/>} />
+        </Routes>
+      </BrowserRouter>
+    </UserProvider>
+    
   </React.StrictMode>,
 )

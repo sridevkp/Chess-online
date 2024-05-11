@@ -1,19 +1,39 @@
-import { useState } from 'react'
 import './App.css'
-import Nav from './components/Nav'
-import Controller from './components/Controller'
-import Chess from './components/Chess'
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import Home from './pages/Home';
+import Play from './pages/Play';
+import Menu from './pages/Menu';
+import socket from './socket/socket';
+import { ChessProvider } from './context/ChessProvider';
+import { useContext, useEffect } from 'react';
+import UserContext from './context/UserProvider';
 
 function App() {
+  const { user, setUser } = useContext(UserContext)
+  const navigate = useNavigate()
+
+  useEffect( () => {
+    socket.on("start", data => {
+      setUser( data )
+      navigate(`play/${data.gameId}`)
+
+      socket.on("message", data => {
+        console.log( data.content )
+      })
+    })
+  }, [socket])
+  
 
   return (
-    <>
-      <main className='grid p-2 gap-2  grid-rows-[50px,92vh,200px] grid-cols-1 md:grid-rows-[50px,92vh] md:grid-cols-[3fr,1fr] h-dvh'>
-        <Nav/>
-        <Chess/>
-        <Controller/>
-      </main>
-    </>
+    <ChessProvider>
+      <Routes>
+        <Route path="/" element={ <Home/> }/>
+        <Route path="play/" element={ <Menu/> }/>
+        <Route path="play/:id" element={ <Play/> }/>
+      </Routes>
+    </ChessProvider>
+    
+    
   )
 }
 

@@ -1,5 +1,4 @@
 import { Image } from "react-konva"
-import useBoard from "../hooks/useBoard"
 
 import wKing from "../assets/w-king.png"
 import wQueen from "../assets/w-queen.png"
@@ -15,6 +14,9 @@ import bRook from "../assets/b-rook.png"
 import bBishop from "../assets/b-bishop.png"
 import bKnight from "../assets/b-knight.png"
 import bPawn from "../assets/b-pawn.png"
+import { useContext, useEffect, useState } from "react"
+import ChessContext from "../context/ChessProvider"
+import UserContext from "../context/UserProvider"
 
 const clamp = ( a, x, b ) => Math.max( a, Math.min(x, b) )
 
@@ -38,22 +40,55 @@ const images = {
 }
 
 const Piece = ({ x, y, boardSize, color, type, onDragEnd }) => {
-    const { board } = useBoard()
+    const [initialPosition, setInitialPosition] = useState({ x, y });
+    const [position, setPosition] = useState({ x, y });
+    const { user } = useContext(UserContext)
+    const { chess } = useContext(ChessContext)
     const image = new window.Image()
     image.src = images[color][type]
 
     const size = boardSize /8
     const offset = size/2
+
+    useEffect(() => {
+        setPosition({x,y})
+    },[boardSize])
+
+    const handleDragEnd = (e) => {
+        const { x, y } = e.target.position();
+        setPosition({ x, y });
+        const invalidMove = onDragEnd(e);
+        if( invalidMove ){
+            setPosition( initialPosition )
+        }
+
+    };
+
+    const handleDragStart = () => {
+        setInitialPosition({ x: position.x, y: position.y });
+    };
+
+    const handleDragMove = (e) => {
+        const { x, y } = e.target.position();
+        setPosition({ x, y });
+    };
+    const handleDragCancel = () => {
+        setPosition({ x: initialPosition.x, y: initialPosition.y });
+      };
+      
     return (
         <Image 
-            x={x*size + offset} 
-            y={y*size + offset} 
+            x={position.x} 
+            y={position.y} 
             offset={{x:offset,y:offset}}
             width={size} 
             height={size} 
             image={image}
-            draggable={board.turn()==color}
-            onDragEnd={onDragEnd}
+            draggable={user.color == color && chess.turn()==color}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            onDragMove={handleDragMove}
+            onDragCancel={handleDragCancel}
             dragBoundFunc={ pos => {
                 return {
                     x : clamp( offset, pos.x, boardSize-offset),

@@ -15,10 +15,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --tw-shadow-color : black;
 }
 *{
   box-sizing: border-box;
 }
 html{
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
 }
