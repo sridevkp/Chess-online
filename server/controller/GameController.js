@@ -5,9 +5,13 @@ var waitingPlayer = null ;
 
 const addUser = socket => {
     console.log("user connected")
-    socket.on( "match", ( data ) => {
+
+    socket.on( "match", ( data ) => 
+    {
+        socket.emit("matching")        
         console.log("matching")
-        if( waitingPlayer ){
+        if( waitingPlayer && waitingPlayer != socket )
+        {
             const game = new Game( waitingPlayer, socket )
             const gameId = game.id
             games[gameId] = game
@@ -23,25 +27,43 @@ const addUser = socket => {
             })
 
             waitingPlayer = null
-        }else{
+        }else
+        {
             waitingPlayer = socket
         }
     })
 
-    socket.on("move", ( move, gameId, cb ) => {
+    socket.on("move", ( move, gameId, cb ) => 
+    {
         const game = games[ gameId ]
         if( ! game ) return socket.emit("message",{ content: "game doesnt exist" }) ;
-        game.move( socket, move, cb )
+
+        if( game.hasPlayer( socket ) ) return game.move( socket, move, cb );
+
+        socket.emit("message",{ content: "unauthorized" })
     })
 
-    socket.on("resign", data => {
-
+    socket.on("resign", gameId => 
+    {
+        const game = games[ gameId ]
+        if( ! game ) return socket.emit("message",{ content: "game doesnt exist" }) ;
+        
+        if( game.hasPlayer( socket ) ) return game.resign( socket );
+        
+        socket.emit("message",{ content: "unauthorized" })
     })
 }
-const removeUser = socket => {
+const removeUser = socket => 
+{
     console.log("disconnected")
     if( waitingPlayer == socket ){
-        waitingPlayer = null 
+        return waitingPlayer = null 
+    }
+    for( let game of Object.values( games) ){
+        if( game.hasPlayer( socket )){
+            game.quitPlayer( socket )
+            return;
+        }
     }
 }
 

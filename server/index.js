@@ -18,7 +18,9 @@ io.on('connection', socket => {
     socket.on('disconnect', () => gameController.removeUser( socket ));
   });
   
-httpServer.listen( PORT );
+httpServer.listen( PORT, () => {
+  console.log(`Listening on   ${PORT}`)
+});
   
   
   

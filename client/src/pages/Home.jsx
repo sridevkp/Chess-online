@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import bg from "../assets/blue-labelled.png"
 import socket from '../socket/socket'
 import Button from '../components/Button'
@@ -9,8 +9,13 @@ const Home = () => {
   const handleClick = e => {
     if( matching ) return ;
     socket.emit( "match", {} )
-    setMatching( true )
   }
+
+  useEffect(()=>{
+    socket.on("matching",()=>{
+      setMatching( true )
+    })
+  },[])
 
   return (
     <div className='container h-dvh w-full flex items-center justify-center'>

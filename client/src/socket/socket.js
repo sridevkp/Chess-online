@@ -1,6 +1,6 @@
 import io from "socket.io-client"
 
-const socket = io("http://176.20.1.84:8080/")
+const socket = io("http://192.168.56.1:8080/")
 socket.on("connect", data => {
     console.log("connected")
 })

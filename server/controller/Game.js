@@ -3,17 +3,18 @@ const ShortUniqueId = require("short-unique-id")
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 class Game{
-    constructor( p1, p2 ){
+    constructor( p1, p2 )
+    {
         this.white = new Player( p1, "w", 3*60 )
         this.black = new Player( p2, "b", 3*60 )
 
         this.chess = new Chess() ;
         this.id = randomUUID() ;
     }
-    move( socket, move, cb ){
-        if( this.white.player != socket && this.black.player != socket ) return socket.emit("message",{ content: "unauthorized" })
-        const curPlayer = this.white.player == socket ? this.white : this.black ;
-        const nextPlayer = this.white.player == socket ? this.black : this.white ;
+    move( socket, move, cb )
+    {
+        const [curPlayer, nextPlayer] = this.white.player == socket ? [this.white, this.black] : [this.black, this.white];
+
         if( this.chess.turn() == curPlayer.color ){
             try{
                 this.chess.move( move )
@@ -29,13 +30,14 @@ class Game{
         }
         this.checkGameOver()
     }
-    checkGameOver(){
+    checkGameOver()
+    {
         if( this.chess.isGameOver() ){
             let winner = null ;
             let message ="Game over!";
 
             if( this.chess.isCheckmate() ){
-                winner = this.chess.turn() == "b"? "b" : "w"
+                winner = this.chess.turn() == "b"? "w" : "b"
                 message = "Checkmate!"
             }
             if( this.chess.isDraw() ){
@@ -52,6 +54,30 @@ class Game{
             this.white.player.emit( "gameover", payload )
             this.black.player.emit( "gameover", payload )
         }
+    }
+    hasPlayer( socket )
+    {
+        return this.white.player == socket || this.black.player == socket
+    }
+    resign( socket )
+    {
+        console.log("game resigned")
+        const [loser, winner] = this.white.player == socket ? [this.white, this.black] : [this.black, this.white];
+        
+        const payload = {
+            winner : winner.color,
+            message: "Game resigned"
+        }
+        winner.player.emit("gameover", payload )
+        loser.player.emit("gameover", payload )
+    }
+    quitPlayer( socket )
+    {
+        if( this.chess.moveNumber() > 1 ) return this.resign( socket );
+    
+        console.log(`game abandoned`)
+        this.white.player.emit("gameabandoned" )
+        this.black.player.emit("gameabandoned" )
     }
 }
 

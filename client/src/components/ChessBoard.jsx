@@ -45,19 +45,25 @@ const ChessBoard = ({ gameId }) => {
     }
     
     const gameOverHandler = (data) => {
-      resetChess()
-      setGameOver( true )
+      setTimeout( () => setGameOver( true ), 1000 )
       if( data.winner ){
         return setGameOverMessage(`${ data.message } ${ data.winner=="b"? "Black" : "White" } Won`)
       }
       setGameOverMessage( data.message )
     }
 
+    const gameAbandonHandler = () => {
+      setGameOver( true )
+      setGameOverMessage( "Game abandoned" )
+    }
+
     socket.on("gameover", gameOverHandler )
+    socket.on("gameabandoned", gameAbandonHandler )
     socket.on("move", moveHandler )
 
     return () => {
       socket.off( "gameover",gameOverHandler )
+      socket.off("gameabandoned", gameAbandonHandler )
       socket.off("move", moveHandler )
     }
   },[socket]) 
@@ -117,6 +123,7 @@ const ChessBoard = ({ gameId }) => {
   }
   const goHome = () =>{
     resetUser()
+    resetChess()
     navigate("/")
   }
 
@@ -141,8 +148,8 @@ const ChessBoard = ({ gameId }) => {
         gameOver
         && <div className='absolute backdrop-blur-xl w-full h-full flex flex-col items-center justify-center gap-6'>
             <div className='text-center'>
-              <h5 className='text-5xl text-slate-700 font-extrabold [text-shadow:1px_1px_2px_white]'>Game over</h5>
-              <h4 className='text-3xl text-slate-200 font-bold [text-shadow:1px_1px_2px_black]'>{ gameOverMessage }</h4> 
+              <h5 className='text-6xl text-slate-200 font-bold [text-shadow:1px_1px_2px_black]'>Game over</h5>
+              <h4 className='text-4xl text-slate-700 font-bold [text-shadow:1px_1px_2px_black]'>{ gameOverMessage }</h4> 
             </div>
             <Button onClick={ goHome }>Play again</Button>
           </div> 
