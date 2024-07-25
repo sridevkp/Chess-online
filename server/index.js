@@ -1,12 +1,13 @@
 const http = require("http")
 const {Server} = require("socket.io")
+require("dotenv").config();
 
-const PORT = 8080
+const PORT = process.env.PORT
 
 const httpServer = http.createServer();
 const io = new Server(httpServer, {
   cors :{
-    origin: ["http://localhost:5173","http://176.20.1.84:5173","http://192.168.137.1:5173"],
+    origin:"*",
     methods: ["GET","POST"]
   }
 });
