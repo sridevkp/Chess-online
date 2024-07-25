@@ -1,6 +1,6 @@
 import io from "socket.io-client"
 
-const socket = io("http://192.168.56.1:8080/")
+const socket = io("https://chess-online-7wr7.onrender.com")
 socket.on("connect", data => {
     console.log("connected")
 })
