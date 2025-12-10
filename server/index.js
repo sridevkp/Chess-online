@@ -1,6 +1,8 @@
 const http = require("http")
 const {Server} = require("socket.io")
-require("dotenv").config();
+
+require("./otel")  // Initialize OpenTelemetry
+
 
 const PORT = process.env.PORT
 
@@ -18,10 +20,13 @@ io.on('connection', socket => {
     gameController.addUser( socket )
     socket.on('disconnect', () => gameController.removeUser( socket ));
   });
+
   
 httpServer.listen( PORT, () => {
   console.log(`Listening on   ${PORT}`)
 });
+
+
   
   
   

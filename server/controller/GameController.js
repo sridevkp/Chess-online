@@ -1,10 +1,12 @@
 const Game = require("./Game")
+const { activePlayers } = require("../active-metric")
 
 var games = {}
 var waitingPlayer = null ;
 
 const addUser = socket => {
     console.log("user connected")
+    activePlayers.add( 1 )
 
     socket.on( "match", ( data ) => 
     {
@@ -55,6 +57,7 @@ const addUser = socket => {
 }
 const removeUser = socket => 
 {
+    activePlayers.add( -1 )
     console.log("disconnected")
     if( waitingPlayer == socket ){
         return waitingPlayer = null 
