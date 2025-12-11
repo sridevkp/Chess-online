@@ -5,6 +5,13 @@ const { RuntimeNodeInstrumentation } = require('@opentelemetry/instrumentation-r
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
 const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+const {
+    BatchLogRecordProcessor,
+} = require('@opentelemetry/sdk-logs');
+const { WinstonInstrumentation } = require('@opentelemetry/instrumentation-winston');
+const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+
 
 require("dotenv").config();
 const otlp_url = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318'
@@ -19,11 +26,23 @@ const metricExporter = new OTLPMetricExporter({
   url: `${otlp_url}/v1/metrics`,
 });
 
+const otlpLogExporter = new OTLPLogExporter({ 
+  url: `${otlp_url}/v1/logs`, 
+  timeoutMillis: 2000
+});
+
+registerInstrumentations({
+  instrumentations: [
+    new WinstonInstrumentation(),
+  ],
+});
+
 const sdk = new NodeSDK({
+  logRecordProcessor: new BatchLogRecordProcessor(otlpLogExporter),
   traceExporter,
   metricReader: new PeriodicExportingMetricReader({
     exporter: metricExporter,
-    exportIntervalMillis: 10_000, // 10s, good for dev; prod often 60s
+    exportIntervalMillis: 60_000, 
   }),
   instrumentations: [
     getNodeAutoInstrumentations(),

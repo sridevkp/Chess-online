@@ -1,23 +1,25 @@
 const Game = require("./Game")
 const { activePlayers } = require("../active-metric")
+const logger = require("../logger")  
 
 var games = {}
 var waitingPlayer = null ;
 
 const addUser = socket => {
-    console.log("user connected")
+    logger.info(`user connected ${socket.id}`);
     activePlayers.add( 1 )
 
     socket.on( "match", ( data ) => 
     {
         socket.emit("matching")        
-        console.log("matching")
+        logger.info(`user matching ${socket.id}`);
+
         if( waitingPlayer && waitingPlayer != socket )
         {
             const game = new Game( waitingPlayer, socket )
             const gameId = game.id
             games[gameId] = game
-            console.log(`game created ${gameId}`)
+            logger.info(`game created ${gameId}`)
 
             waitingPlayer.emit("start", {
                 color : "w",
@@ -58,7 +60,8 @@ const addUser = socket => {
 const removeUser = socket => 
 {
     activePlayers.add( -1 )
-    console.log("disconnected")
+    logger.info(`user disconnected ${socket.id}`)
+    
     if( waitingPlayer == socket ){
         return waitingPlayer = null 
     }

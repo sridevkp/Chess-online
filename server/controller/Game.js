@@ -1,5 +1,6 @@
 const { Chess } = require('chess.js')
-const ShortUniqueId = require("short-unique-id")
+const ShortUniqueId = require("short-unique-id");
+const logger = require('../logger');
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 class Game{
@@ -61,7 +62,7 @@ class Game{
     }
     resign( socket )
     {
-        console.log("game resigned")
+        logger.info("game resigned")
         const [loser, winner] = this.white.player == socket ? [this.white, this.black] : [this.black, this.white];
         
         const payload = {
@@ -75,7 +76,7 @@ class Game{
     {
         if( this.chess.moveNumber() > 1 ) return this.resign( socket );
     
-        console.log(`game abandoned`)
+        logger.info(`game abandoned${this.id}`)
         this.white.player.emit("gameabandoned" )
         this.black.player.emit("gameabandoned" )
     }

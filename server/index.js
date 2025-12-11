@@ -13,7 +13,8 @@ const io = new Server(httpServer, {
     methods: ["GET","POST"]
   }
 });
-const gameController = require("./controller/GameController")
+const gameController = require("./controller/GameController");
+const logger = require("./logger");
 
 
 io.on('connection', socket => {
@@ -23,7 +24,7 @@ io.on('connection', socket => {
 
   
 httpServer.listen( PORT, () => {
-  console.log(`Listening on   ${PORT}`)
+  logger.info(`Listening on   ${PORT}`)
 });
 
 
